@@ -18,7 +18,7 @@ OpenClaw is a self-hosted AI assistant gateway with 35+ CLI commands, 50+ skills
 | **Voice & STT** | `openclaw tts` / `openclaw talk` | TTS testing, speech recognition, talk mode |
 | **Nodes** | `openclaw nodes` / `openclaw devices` | Connected nodes and device pairing |
 | **Skills** | `openclaw skills list` | Browse skills with eligibility and install status |
-| **Channels** | `openclaw channels` | WhatsApp, Telegram, Discord, etc. status |
+| **Channels** | `openclaw channels` | WhatsApp QR login, channel linking, status |
 | **Cron** | `openclaw cron list/add/run` | Scheduled job management |
 | **Config** | `openclaw config get/set` | Live config editor with collapsible tree view |
 | **Logs** | `openclaw logs` | Real-time log streaming |
@@ -42,7 +42,7 @@ OpenClaw is a self-hosted AI assistant gateway with 35+ CLI commands, 50+ skills
 
 ```bash
 # Clone
-git clone https://github.com/YOUR_USERNAME/openclaw-dashboard.git
+git clone https://github.com/actionagentai/openclaw-dashboard.git
 cd openclaw-dashboard
 
 # Install dependencies

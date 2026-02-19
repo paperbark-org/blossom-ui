@@ -481,6 +481,10 @@ export type RPCMethodMap = {
   "channels.status": [void, ChannelsStatusResult];
   "channels.logout": [{ id: string }, void];
 
+  // Web Login (WhatsApp QR code flow)
+  "web.login.start": [{ id?: string } | void, { qrDataUrl: string; message?: string }];
+  "web.login.wait": [{ timeoutMs?: number } | void, { connected: boolean; message?: string }];
+
   // Cron
   "cron.list": [void, CronJob[]];
   "cron.status": [void, unknown];
