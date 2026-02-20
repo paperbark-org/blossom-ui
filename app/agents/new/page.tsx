@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useOpenClaw } from "@/contexts/OpenClawContext";
 import { useOpenClawAgents } from "@/hooks/use-openclaw-agents";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function NewAgentPage() {
   const router = useRouter();
@@ -12,7 +15,7 @@ export default function NewAgentPage() {
   const { createAgent } = useOpenClawAgents();
 
   const [name, setName] = useState("");
-  const [emoji, setEmoji] = useState("🤖");
+  const [emoji, setEmoji] = useState("\uD83E\uDD16");
   const [theme, setTheme] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,11 +28,8 @@ export default function NewAgentPage() {
     setSaving(true);
     setError(null);
     try {
-      await createAgent({
-        name,
-        identity: { name, emoji, theme },
-      });
-      router.push("agents");
+      await createAgent({ name, identity: { name, emoji, theme } });
+      router.push("/agents");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create agent");
     } finally {
@@ -40,76 +40,34 @@ export default function NewAgentPage() {
   return (
     <div className="p-6 space-y-6 max-w-2xl">
       <div className="flex items-center gap-3">
-        <button
-          onClick={() => router.push("agents")}
-          className="p-2 rounded-lg hover:bg-white/5 transition-colors"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-          New Agent
-        </h1>
+        <Button variant="ghost" size="icon" onClick={() => router.push("/agents")}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold text-foreground">New Agent</h1>
       </div>
 
       {error && (
-        <div className="px-4 py-3 rounded-lg bg-red-500/10 text-red-500 text-sm">
-          {error}
-        </div>
+        <div className="px-4 py-3 rounded-lg bg-destructive/10 text-destructive text-sm">{error}</div>
       )}
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Name *
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="My Agent"
-            className="w-full px-3 py-2 rounded-lg border bg-transparent text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
-            style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
-          />
+          <label className="block text-sm font-medium mb-1.5 text-muted-foreground">Name *</label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="My Agent" />
         </div>
-
         <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Emoji
-          </label>
-          <input
-            type="text"
-            value={emoji}
-            onChange={(e) => setEmoji(e.target.value)}
-            className="w-20 px-3 py-2 rounded-lg border bg-transparent text-sm text-center outline-none focus:ring-2 focus:ring-blue-500/50"
-            style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
-            maxLength={4}
-          />
+          <label className="block text-sm font-medium mb-1.5 text-muted-foreground">Emoji</label>
+          <Input value={emoji} onChange={(e) => setEmoji(e.target.value)} className="w-20 text-center" maxLength={4} />
         </div>
-
         <div>
-          <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Theme / System Prompt
-          </label>
-          <textarea
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            rows={6}
-            placeholder="You are a helpful assistant..."
-            className="w-full px-3 py-2 rounded-lg border bg-transparent text-sm outline-none resize-y focus:ring-2 focus:ring-blue-500/50"
-            style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
-          />
+          <label className="block text-sm font-medium mb-1.5 text-muted-foreground">Theme / System Prompt</label>
+          <Textarea value={theme} onChange={(e) => setTheme(e.target.value)} rows={6} placeholder="You are a helpful assistant..." />
         </div>
-
         <div className="flex justify-end">
-          <button
-            onClick={handleCreate}
-            disabled={saving || !isConnected}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          <Button onClick={handleCreate} disabled={saving || !isConnected}>
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
             Create Agent
-          </button>
+          </Button>
         </div>
       </div>
     </div>

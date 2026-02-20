@@ -3,21 +3,25 @@
 import { useEffect, useRef, useState } from "react";
 import { useOpenClawChat, type ChatMessage } from "@/hooks/use-openclaw-chat";
 import { useOpenClaw } from "@/contexts/OpenClawContext";
-import { Send, Square, Bot, User, Loader2, AlertCircle } from "lucide-react";
+import { Send, Square, Bot, User, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-export default function OpenClawChatPage() {
+export default function ChatPage() {
   const { isConnected } = useOpenClaw();
   const { messages, isStreaming, error, sendMessage, abort, loadHistory } = useOpenClawChat();
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load history on connect
   useEffect(() => {
     if (isConnected) loadHistory();
   }, [isConnected, loadHistory]);
 
-  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -37,41 +41,23 @@ export default function OpenClawChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      {/* Header */}
-      <div
-        className="px-6 py-4 border-b flex items-center justify-between flex-shrink-0"
-        style={{ borderColor: "var(--border)" }}
-      >
+    <div className="flex flex-col h-[calc(100vh-3rem)]">
+      <div className="px-6 py-4 border-b flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-            Chat
-          </h1>
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            Talk to your OpenClaw AI assistant
-          </p>
+          <h1 className="text-lg font-semibold text-foreground">Chat</h1>
+          <p className="text-xs text-muted-foreground">Talk to your Blossom AI assistant</p>
         </div>
         {!isConnected && (
-          <span className="text-xs px-2 py-1 rounded-full bg-red-500/10 text-red-500">
-            Disconnected
-          </span>
+          <Badge variant="destructive">Disconnected</Badge>
         )}
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <Bot
-              className="w-16 h-16 mb-4"
-              style={{ color: "var(--text-secondary)" }}
-            />
-            <p className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-              Start a conversation
-            </p>
-            <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-              Type a message or use the mic button to speak
-            </p>
+            <Bot className="h-16 w-16 mb-4 text-muted-foreground" />
+            <p className="text-lg font-medium text-foreground">Start a conversation</p>
+            <p className="text-sm mt-1 text-muted-foreground">Type a message below</p>
           </div>
         )}
 
@@ -80,8 +66,8 @@ export default function OpenClawChatPage() {
         ))}
 
         {error && (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-500 text-sm">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-destructive/10 text-destructive text-sm">
+            <AlertCircle className="h-4 w-4 shrink-0" />
             {error}
           </div>
         )}
@@ -89,51 +75,36 @@ export default function OpenClawChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div
-        className="px-6 py-4 border-t flex-shrink-0"
-        style={{ borderColor: "var(--border)" }}
-      >
-        <div
-          className="flex items-end gap-3 rounded-xl border p-3"
-          style={{
-            background: "var(--card)",
-            borderColor: "var(--border)",
-          }}
-        >
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
-            rows={1}
-            className="flex-1 bg-transparent resize-none outline-none text-sm leading-relaxed"
-            style={{
-              color: "var(--text-primary)",
-              maxHeight: "120px",
-            }}
-            disabled={!isConnected}
-          />
-          {isStreaming ? (
-            <button
-              onClick={abort}
-              className="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors flex-shrink-0"
-              title="Stop generating"
-            >
-              <Square className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || !isConnected}
-              className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-40 disabled:hover:bg-blue-600 flex-shrink-0"
-              title="Send message"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+      <div className="px-6 py-4 border-t shrink-0">
+        <Card className="p-3">
+          <div className="flex items-end gap-3">
+            <Textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type a message..."
+              rows={1}
+              className="flex-1 resize-none border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm"
+              style={{ maxHeight: "120px" }}
+              disabled={!isConnected}
+            />
+            {isStreaming ? (
+              <Button size="icon" variant="destructive" onClick={abort} title="Stop generating">
+                <Square className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                size="icon"
+                onClick={handleSend}
+                disabled={!input.trim() || !isConnected}
+                title="Send message"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </Card>
       </div>
     </div>
   );
@@ -141,36 +112,25 @@ export default function OpenClawChatPage() {
 
 function ChatBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
-  const isStreaming = message.state === "delta";
+  const isStreamingMsg = message.state === "delta";
 
   return (
     <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
-      <div
-        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-        style={{
-          background: isUser ? "var(--primary, #3b82f6)" : "var(--border)",
-        }}
-      >
-        {isUser ? (
-          <User className="w-4 h-4 text-white" />
-        ) : (
-          <Bot className="w-4 h-4" style={{ color: "var(--text-secondary)" }} />
-        )}
-      </div>
+      <Avatar className="h-8 w-8 shrink-0">
+        <AvatarFallback className={isUser ? "bg-primary text-primary-foreground" : "bg-muted"}>
+          {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+        </AvatarFallback>
+      </Avatar>
       <div
         className={`max-w-[75%] rounded-xl px-4 py-2.5 ${
-          isUser ? "rounded-br-sm" : "rounded-bl-sm"
+          isUser
+            ? "bg-primary text-primary-foreground rounded-br-sm"
+            : "bg-card text-card-foreground border rounded-bl-sm"
         }`}
-        style={{
-          background: isUser ? "var(--primary, #3b82f6)" : "var(--card)",
-          color: isUser ? "white" : "var(--text-primary)",
-          borderColor: isUser ? undefined : "var(--border)",
-          border: isUser ? undefined : "1px solid var(--border)",
-        }}
       >
         <div className="text-sm leading-relaxed whitespace-pre-wrap">
           {message.content}
-          {isStreaming && (
+          {isStreamingMsg && (
             <span className="inline-block w-1.5 h-4 ml-0.5 bg-current opacity-60 animate-pulse" />
           )}
         </div>

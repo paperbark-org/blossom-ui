@@ -5,7 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useOpenClaw } from "@/contexts/OpenClawContext";
 import { useOpenClawAgents } from "@/hooks/use-openclaw-agents";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
-import type { AgentSummary } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function EditAgentPage() {
   const params = useParams();
@@ -32,11 +34,8 @@ export default function EditAgentPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await updateAgent({
-        id: agentId,
-        identity: { name, emoji, theme },
-      });
-      router.push("agents");
+      await updateAgent({ id: agentId, identity: { name, emoji, theme } });
+      router.push("/agents");
     } catch (err) {
       console.error("Failed to update agent:", err);
     } finally {
@@ -47,97 +46,44 @@ export default function EditAgentPage() {
   if (loading && !agent) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--text-secondary)" }} />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   if (!agent && !loading) {
-    return (
-      <div className="p-6">
-        <p style={{ color: "var(--text-secondary)" }}>Agent not found.</p>
-      </div>
-    );
+    return <div className="p-6 text-muted-foreground">Agent not found.</div>;
   }
 
   return (
     <div className="p-6 space-y-6 max-w-2xl">
       <div className="flex items-center gap-3">
-        <button
-          onClick={() => router.push("agents")}
-          className="p-2 rounded-lg hover:bg-white/5 transition-colors"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Edit Agent
-        </h1>
+        <Button variant="ghost" size="icon" onClick={() => router.push("/agents")}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold text-foreground">Edit Agent</h1>
       </div>
 
       <div className="space-y-4">
-        <Field label="Name">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border bg-transparent text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
-            style={{
-              borderColor: "var(--border)",
-              color: "var(--text-primary)",
-            }}
-          />
-        </Field>
-
-        <Field label="Emoji">
-          <input
-            type="text"
-            value={emoji}
-            onChange={(e) => setEmoji(e.target.value)}
-            className="w-20 px-3 py-2 rounded-lg border bg-transparent text-sm text-center outline-none focus:ring-2 focus:ring-blue-500/50"
-            style={{
-              borderColor: "var(--border)",
-              color: "var(--text-primary)",
-            }}
-            maxLength={4}
-          />
-        </Field>
-
-        <Field label="Theme / System Prompt">
-          <textarea
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            rows={6}
-            className="w-full px-3 py-2 rounded-lg border bg-transparent text-sm outline-none resize-y focus:ring-2 focus:ring-blue-500/50"
-            style={{
-              borderColor: "var(--border)",
-              color: "var(--text-primary)",
-            }}
-          />
-        </Field>
-
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-muted-foreground">Name</label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-muted-foreground">Emoji</label>
+          <Input value={emoji} onChange={(e) => setEmoji(e.target.value)} className="w-20 text-center" maxLength={4} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-muted-foreground">Theme / System Prompt</label>
+          <Textarea value={theme} onChange={(e) => setTheme(e.target.value)} rows={6} />
+        </div>
         <div className="flex justify-end">
-          <button
-            onClick={handleSave}
-            disabled={saving || !isConnected}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          <Button onClick={handleSave} disabled={saving || !isConnected}>
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
             Save Changes
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-        {label}
-      </label>
-      {children}
     </div>
   );
 }

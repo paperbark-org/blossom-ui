@@ -15,9 +15,13 @@ import {
   Archive,
   AlertCircle,
 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import type { SessionSummary } from "@/lib/types";
 
-export default function OpenClawSessionsPage() {
+export default function SessionsPage() {
   const { isConnected } = useOpenClaw();
   const { sessions, loading, error, refresh, deleteSession, resetSession, compactSession } =
     useOpenClawSessions();
@@ -51,48 +55,36 @@ export default function OpenClawSessionsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-            Sessions
-          </h1>
-          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-            Browse and manage conversation sessions
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">Sessions</h1>
+          <p className="text-sm mt-1 text-muted-foreground">Browse and manage conversation sessions</p>
         </div>
-        <button
-          onClick={refresh}
-          disabled={loading}
-          className="p-2 rounded-lg hover:bg-white/5 transition-colors"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-        </button>
+        <Button variant="ghost" size="icon" onClick={refresh} disabled={loading}>
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+        </Button>
       </div>
 
-      {/* Search */}
-      <input
-        type="text"
+      <Input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search sessions..."
-        className="w-full max-w-md px-3 py-2 rounded-lg border bg-transparent text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
-        style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
+        className="max-w-md"
       />
 
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 text-red-500 text-sm">
-          <AlertCircle className="w-4 h-4" />
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+          <AlertCircle className="h-4 w-4" />
           {error}
         </div>
       )}
 
       {loading && sessions.length === 0 ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--text-secondary)" }} />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20">
-          <Folder className="w-16 h-16 mx-auto mb-4" style={{ color: "var(--text-secondary)" }} />
-          <p className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+          <Folder className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-lg font-medium text-foreground">
             {search ? "No matching sessions" : "No sessions yet"}
           </p>
         </div>
@@ -126,36 +118,29 @@ function SessionRow({
   const agentId = session.key.split(":")[1] ?? session.agentId;
 
   return (
-    <div
-      className="flex items-center justify-between px-4 py-3 rounded-xl border group hover:border-blue-500/30 transition-colors"
-      style={{ background: "var(--card)", borderColor: "var(--border)" }}
-    >
+    <Card className="flex items-center justify-between px-4 py-3 group hover:border-primary/30 transition-colors">
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <MessageSquare className="w-4 h-4 flex-shrink-0" style={{ color: "var(--text-secondary)" }} />
+        <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0">
-          <h3 className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
-            {title}
-          </h3>
+          <h3 className="text-sm font-medium truncate text-foreground">{title}</h3>
           <div className="flex items-center gap-3 mt-0.5">
             {agentId && (
-              <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
-                <Bot className="w-3 h-3" />
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Bot className="h-3 w-3" />
                 {agentId}
               </span>
             )}
             {session.channel && (
-              <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "var(--background)", color: "var(--text-secondary)" }}>
-                {session.channel}
-              </span>
+              <Badge variant="outline" className="text-xs">{session.channel}</Badge>
             )}
             {timeAgo && (
-              <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
-                <Clock className="w-3 h-3" />
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
                 {timeAgo}
               </span>
             )}
             {session.totalTokens != null && (
-              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+              <span className="text-xs text-muted-foreground">
                 {(session.totalTokens / 1000).toFixed(1)}K tokens
               </span>
             )}
@@ -163,58 +148,39 @@ function SessionRow({
         </div>
       </div>
 
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-        <ActionBtn
-          icon={<RotateCcw className="w-3 h-3" />}
-          label="Reset"
-          loading={actionLoading === `${session.key}-reset`}
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
           onClick={() => onAction(session.key, "reset")}
-        />
-        <ActionBtn
-          icon={<Archive className="w-3 h-3" />}
-          label="Compact"
-          loading={actionLoading === `${session.key}-compact`}
+          disabled={actionLoading === `${session.key}-reset`}
+          title="Reset"
+        >
+          {actionLoading === `${session.key}-reset` ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
           onClick={() => onAction(session.key, "compact")}
-        />
-        <ActionBtn
-          icon={<Trash2 className="w-3 h-3" />}
-          label="Delete"
-          loading={actionLoading === `${session.key}-delete`}
+          disabled={actionLoading === `${session.key}-compact`}
+          title="Compact"
+        >
+          {actionLoading === `${session.key}-compact` ? <Loader2 className="h-3 w-3 animate-spin" /> : <Archive className="h-3 w-3" />}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-destructive hover:text-destructive"
           onClick={() => onAction(session.key, "delete")}
-          danger
-        />
+          disabled={actionLoading === `${session.key}-delete`}
+          title="Delete"
+        >
+          {actionLoading === `${session.key}-delete` ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+        </Button>
       </div>
-    </div>
-  );
-}
-
-function ActionBtn({
-  icon,
-  label,
-  loading,
-  onClick,
-  danger,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  loading: boolean;
-  onClick: () => void;
-  danger?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={loading}
-      title={label}
-      className={`p-1.5 rounded-md text-xs transition-colors ${
-        danger
-          ? "text-red-400 hover:bg-red-500/10"
-          : "hover:bg-white/5"
-      }`}
-      style={danger ? undefined : { color: "var(--text-secondary)" }}
-    >
-      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : icon}
-    </button>
+    </Card>
   );
 }
 

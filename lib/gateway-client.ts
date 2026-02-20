@@ -20,7 +20,7 @@ type Pending = {
 };
 
 type EventListener<E extends GatewayEventName = GatewayEventName> = (
-  payload: GatewayEventMap[E]
+  payload: GatewayEventMap[E],
 ) => void;
 
 export type GatewayClientOptions = {
@@ -51,9 +51,7 @@ export class GatewayClient {
   private connectTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private backoffMs = 800;
-  private opts: Required<
-    Pick<GatewayClientOptions, "url" | "rpcTimeoutMs">
-  > &
+  private opts: Required<Pick<GatewayClientOptions, "url" | "rpcTimeoutMs">> &
     GatewayClientOptions;
 
   state: GatewayConnectionState = "disconnected";
@@ -116,7 +114,9 @@ export class GatewayClient {
     return new Promise<T>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);
-        reject(new Error(`RPC timeout: ${method} (${this.opts.rpcTimeoutMs}ms)`));
+        reject(
+          new Error(`RPC timeout: ${method} (${this.opts.rpcTimeoutMs}ms)`),
+        );
       }, this.opts.rpcTimeoutMs);
 
       this.pending.set(id, {
@@ -132,7 +132,7 @@ export class GatewayClient {
 
   on<E extends GatewayEventName>(
     event: E,
-    callback: (payload: GatewayEventMap[E]) => void
+    callback: (payload: GatewayEventMap[E]) => void,
   ): () => void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
@@ -178,7 +178,7 @@ export class GatewayClient {
     this.ws.addEventListener("close", (ev) => {
       this.ws = null;
       this.flushPending(
-        new Error(`gateway closed (${ev.code}): ${ev.reason ?? ""}`)
+        new Error(`gateway closed (${ev.code}): ${ev.reason ?? ""}`),
       );
       if (!this.closed) {
         this.setState("disconnected");
@@ -292,7 +292,7 @@ export class GatewayClient {
       const seq = typeof evt.seq === "number" ? evt.seq : null;
       if (seq !== null && this.lastSeq !== null && seq > this.lastSeq + 1) {
         console.warn(
-          `[openclaw] event sequence gap: expected ${this.lastSeq + 1}, got ${seq}`
+          `[openclaw] event sequence gap: expected ${this.lastSeq + 1}, got ${seq}`,
         );
       }
       if (seq !== null) this.lastSeq = seq;
@@ -323,9 +323,7 @@ export class GatewayClient {
       if (res.ok) {
         pending.resolve(res.payload);
       } else {
-        pending.reject(
-          new Error(res.error?.message ?? "request failed")
-        );
+        pending.reject(new Error(res.error?.message ?? "request failed"));
       }
     }
   }

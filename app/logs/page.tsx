@@ -3,15 +3,23 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useOpenClaw } from "@/contexts/OpenClawContext";
 import {
-  ScrollText,
   RefreshCw,
   Loader2,
   Pause,
   Play,
   Trash2,
   Download,
-  Filter,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type LogLevel = "all" | "info" | "warn" | "error";
 
@@ -22,8 +30,8 @@ const LEVEL_COLORS: Record<string, string> = {
   DEBUG: "#6b7280",
 };
 
-export default function OpenClawLogsPage() {
-  const { rpc, isConnected, subscribe } = useOpenClaw();
+export default function LogsPage() {
+  const { rpc, isConnected } = useOpenClaw();
   const [logs, setLogs] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -32,7 +40,6 @@ export default function OpenClawLogsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef(true);
 
-  // Initial log load
   const loadLogs = useCallback(async () => {
     if (!isConnected) return;
     setLoading(true);
@@ -50,17 +57,13 @@ export default function OpenClawLogsPage() {
     if (isConnected) loadLogs();
   }, [isConnected, loadLogs]);
 
-  // Subscribe to live log events (via "agent" event or tick)
   useEffect(() => {
     if (!isConnected || paused) return;
-
-    // Poll for new logs every 3 seconds
     const interval = setInterval(async () => {
       try {
         const result = await rpc("logs.tail", { lines: 50 });
         if (Array.isArray(result) && result.length > 0) {
           setLogs((prev) => {
-            // Deduplicate by keeping last 500 lines
             const combined = [...prev, ...result];
             const unique = [...new Set(combined)];
             return unique.slice(-500);
@@ -70,30 +73,25 @@ export default function OpenClawLogsPage() {
         // Ignore poll errors
       }
     }, 3000);
-
     return () => clearInterval(interval);
   }, [isConnected, paused, rpc]);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     if (autoScrollRef.current && containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [logs]);
 
-  // Handle scroll to detect user scrolling up
   const handleScroll = () => {
     if (!containerRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
     autoScrollRef.current = scrollHeight - scrollTop - clientHeight < 50;
   };
 
-  // Filter logs
   const filteredLogs = logs.filter((line) => {
     if (filter && !line.toLowerCase().includes(filter.toLowerCase())) return false;
     if (levelFilter !== "all") {
-      const level = levelFilter.toUpperCase();
-      if (!line.includes(level)) return false;
+      if (!line.includes(levelFilter.toUpperCase())) return false;
     }
     return true;
   });
@@ -103,105 +101,63 @@ export default function OpenClawLogsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `openclaw-logs-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `blossom-logs-${new Date().toISOString().slice(0, 10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      {/* Header */}
-      <div
-        className="px-6 py-4 border-b flex items-center justify-between flex-shrink-0"
-        style={{ borderColor: "var(--border)" }}
-      >
+    <div className="flex flex-col h-[calc(100vh-3rem)]">
+      <div className="px-6 py-4 border-b flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-            Logs
-          </h1>
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+          <h1 className="text-lg font-semibold text-foreground">Logs</h1>
+          <p className="text-xs text-muted-foreground">
             {filteredLogs.length} lines {paused ? "(paused)" : "(live)"}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {/* Level filter */}
-          <select
-            value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value as LogLevel)}
-            className="px-2 py-1.5 rounded-lg border bg-transparent text-xs outline-none"
-            style={{
-              borderColor: "var(--border)",
-              color: "var(--text-primary)",
-              background: "var(--card)",
-            }}
-          >
-            <option value="all">All Levels</option>
-            <option value="error">Errors</option>
-            <option value="warn">Warnings</option>
-            <option value="info">Info</option>
-          </select>
+          <Select value={levelFilter} onValueChange={(v) => setLevelFilter(v as LogLevel)}>
+            <SelectTrigger className="w-28 h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Levels</SelectItem>
+              <SelectItem value="error">Errors</SelectItem>
+              <SelectItem value="warn">Warnings</SelectItem>
+              <SelectItem value="info">Info</SelectItem>
+            </SelectContent>
+          </Select>
 
-          {/* Text filter */}
-          <input
-            type="text"
+          <Input
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Filter..."
-            className="w-40 px-2 py-1.5 rounded-lg border bg-transparent text-xs outline-none"
-            style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
+            className="w-40 h-8 text-xs"
           />
 
-          <button
-            onClick={() => setPaused(!paused)}
-            className="p-1.5 rounded-lg hover:bg-white/5 transition-colors"
-            style={{ color: "var(--text-secondary)" }}
-            title={paused ? "Resume" : "Pause"}
-          >
-            {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-          </button>
-
-          <button
-            onClick={() => setLogs([])}
-            className="p-1.5 rounded-lg hover:bg-white/5 transition-colors"
-            style={{ color: "var(--text-secondary)" }}
-            title="Clear"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={downloadLogs}
-            className="p-1.5 rounded-lg hover:bg-white/5 transition-colors"
-            style={{ color: "var(--text-secondary)" }}
-            title="Download logs"
-          >
-            <Download className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={loadLogs}
-            disabled={loading}
-            className="p-1.5 rounded-lg hover:bg-white/5 transition-colors"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          </button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setPaused(!paused)} title={paused ? "Resume" : "Pause"}>
+            {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setLogs([])} title="Clear">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={downloadLogs} title="Download">
+            <Download className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={loadLogs} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          </Button>
         </div>
       </div>
 
-      {/* Log content */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 py-2 font-mono text-xs leading-5"
-        style={{
-          background: "#0d1117",
-          color: "#c9d1d9",
-        }}
+        className="flex-1 overflow-y-auto px-4 py-2 font-mono text-xs leading-5 bg-[#0d1117] text-[#c9d1d9]"
       >
         {loading && logs.length === 0 ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
+            <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
           </div>
         ) : filteredLogs.length === 0 ? (
           <div className="flex items-center justify-center py-20 text-gray-500">
@@ -209,7 +165,6 @@ export default function OpenClawLogsPage() {
           </div>
         ) : (
           filteredLogs.map((line, i) => {
-            // Color-code by level
             let color = "#c9d1d9";
             for (const [level, c] of Object.entries(LEVEL_COLORS)) {
               if (line.includes(level)) {

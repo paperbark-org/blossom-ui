@@ -1,39 +1,201 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ==========================================================================
+   BLOSSOM UI - Gateway Dashboard Theme
+   Matches Blossom Design System ("Enterprise Bloom")
+   Palette: Coral, Blush, Lavender, Peach, Rose, Navy
+   Dark-mode first for developer dashboard context
+   ========================================================================== */
 
 :root {
-  --background: #0a0a1a;
-  --card: #111125;
-  --border: #1e1e3a;
-  --text-primary: #e8e8f0;
-  --text-secondary: #8888aa;
-  --primary: #3b82f6;
-  --accent: #6366f1;
+  --radius: 0.625rem;
+
+  /* Light mode */
+  --background: #FDFBF9;
+  --foreground: #2D3047;
+
+  --card: #FFFFFF;
+  --card-foreground: #2D3047;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #2D3047;
+
+  --primary: #E8A598;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #2D3047;
+  --secondary-foreground: #FFFFFF;
+
+  --muted: #F9F5F3;
+  --muted-foreground: #6B7280;
+
+  --accent: #C9B8D9;
+  --accent-foreground: #2D3047;
+
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+
+  --success: #16A34A;
+  --success-foreground: #FFFFFF;
+
+  --warning: #F59E0B;
+  --warning-foreground: #2D3047;
+
+  --info: #3B82F6;
+  --info-foreground: #FFFFFF;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --input: #FFFFFF;
+  --ring: #E8A598;
+
+  /* Blossom petal palette */
+  --blossom-coral: #E8A598;
+  --blossom-blush: #F5C4BC;
+  --blossom-lavender: #C9B8D9;
+  --blossom-peach: #FDDAC4;
+  --blossom-rose: #E6B8C2;
+  --blossom-navy: #2D3047;
+
+  --chart-1: #E8A598;
+  --chart-2: #C9B8D9;
+  --chart-3: #F5C4BC;
+  --chart-4: #FDDAC4;
+  --chart-5: #E6B8C2;
+
+  --sidebar: #FDFBF9;
+  --sidebar-foreground: #2D3047;
+  --sidebar-primary: #E8A598;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #C9B8D9;
+  --sidebar-accent-foreground: #2D3047;
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+  --sidebar-ring: #E8A598;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #f8f9fc;
-    --card: #ffffff;
-    --border: #e2e4ea;
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --primary: #3b82f6;
-    --accent: #6366f1;
+.dark {
+  --background: #0F1419;
+  --foreground: #F5F5F5;
+
+  --card: #1A1F2E;
+  --card-foreground: #F5F5F5;
+
+  --popover: #1A1F2E;
+  --popover-foreground: #F5F5F5;
+
+  --primary: #E8A598;
+  --primary-foreground: #0F1419;
+
+  --secondary: #2D3047;
+  --secondary-foreground: #F5F5F5;
+
+  --muted: #1A1F2E;
+  --muted-foreground: #9CA3AF;
+
+  --accent: #C9B8D9;
+  --accent-foreground: #0F1419;
+
+  --destructive: #EF4444;
+  --destructive-foreground: #0F1419;
+
+  --success: #22C55E;
+  --success-foreground: #0F1419;
+
+  --warning: #FBBF24;
+  --warning-foreground: #0F1419;
+
+  --info: #60A5FA;
+  --info-foreground: #0F1419;
+
+  --border: rgba(255, 255, 255, 0.1);
+  --input: #1A1F2E;
+  --ring: #E8A598;
+
+  --chart-1: #E8A598;
+  --chart-2: #C9B8D9;
+  --chart-3: #F5C4BC;
+  --chart-4: #FDDAC4;
+  --chart-5: #E6B8C2;
+
+  --sidebar: #0F1419;
+  --sidebar-foreground: #F5F5F5;
+  --sidebar-primary: #E8A598;
+  --sidebar-primary-foreground: #0F1419;
+  --sidebar-accent: #C9B8D9;
+  --sidebar-accent-foreground: #0F1419;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #E8A598;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Blossom petal colors for Tailwind */
+  --color-blossom-coral: var(--blossom-coral);
+  --color-blossom-blush: var(--blossom-blush);
+  --color-blossom-lavender: var(--blossom-lavender);
+  --color-blossom-peach: var(--blossom-peach);
+  --color-blossom-rose: var(--blossom-rose);
+  --color-blossom-navy: var(--blossom-navy);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background: var(--background);
-  color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-* {
-  box-sizing: border-box;
+  body {
+    @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
 /* Scrollbar */
@@ -48,5 +210,5 @@ body {
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+  background: var(--muted-foreground);
 }

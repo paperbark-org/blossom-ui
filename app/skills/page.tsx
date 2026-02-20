@@ -9,11 +9,14 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Download,
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import type { SkillInfo } from "@/lib/types";
 
-export default function OpenClawSkillsPage() {
+export default function SkillsPage() {
   const { rpc, isConnected } = useOpenClaw();
   const [skills, setSkills] = useState<SkillInfo[]>([]);
   const [loading, setLoading] = useState(false);
@@ -57,59 +60,48 @@ export default function OpenClawSkillsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-            Skills
-          </h1>
-          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+          <h1 className="text-2xl font-bold text-foreground">Skills</h1>
+          <p className="text-sm mt-1 text-muted-foreground">
             {readyCount} of {skills.length} skills ready
           </p>
         </div>
-        <button
-          onClick={refresh}
-          disabled={loading}
-          className="p-2 rounded-lg hover:bg-white/5 transition-colors"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-        </button>
+        <Button variant="ghost" size="icon" onClick={refresh} disabled={loading}>
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+        </Button>
       </div>
 
       <div className="flex items-center gap-3">
-        <input
-          type="text"
+        <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search skills..."
-          className="flex-1 max-w-md px-3 py-2 rounded-lg border bg-transparent text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
-          style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
+          className="flex-1 max-w-md"
         />
-        <div className="flex rounded-lg border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+        <div className="flex rounded-lg border overflow-hidden">
           {(["all", "ready", "missing"] as const).map((f) => (
-            <button
+            <Button
               key={f}
+              variant={filter === f ? "default" : "ghost"}
+              size="sm"
+              className="rounded-none text-xs capitalize h-9"
               onClick={() => setFilter(f)}
-              className="px-3 py-1.5 text-xs font-medium capitalize transition-colors"
-              style={{
-                background: filter === f ? "var(--accent)" : "transparent",
-                color: filter === f ? "#fff" : "var(--text-secondary)",
-              }}
             >
               {f}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 text-red-500 text-sm">
-          <AlertCircle className="w-4 h-4" />
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+          <AlertCircle className="h-4 w-4" />
           {error}
         </div>
       )}
 
       {loading && skills.length === 0 ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin" style={{ color: "var(--text-secondary)" }} />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -118,65 +110,39 @@ export default function OpenClawSkillsPage() {
             const missingBins = skill.missing?.bins ?? [];
 
             return (
-              <div
-                key={skill.skillKey || skill.name}
-                className="rounded-xl border p-4 hover:border-blue-500/30 transition-colors"
-                style={{ background: "var(--card)", borderColor: "var(--border)" }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-lg">{skill.emoji || "🧩"}</span>
-                    <div>
-                      <h3 className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                        {skill.name}
-                      </h3>
-                      <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>
-                        {skill.source ?? "unknown"}
-                      </p>
+              <Card key={skill.skillKey || skill.name} className="hover:border-primary/30 transition-colors">
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg">{skill.emoji || "\uD83E\uDDE9"}</span>
+                      <div>
+                        <h3 className="text-sm font-medium text-foreground">{skill.name}</h3>
+                        <p className="text-[10px] text-muted-foreground">{skill.source ?? "unknown"}</p>
+                      </div>
                     </div>
+                    {ready ? (
+                      <CheckCircle className="h-4 w-4 text-success shrink-0" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+                    )}
                   </div>
-                  {ready ? (
-                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  ) : (
-                    <XCircle className="w-4 h-4 flex-shrink-0" style={{ color: "var(--text-secondary)" }} />
+                  {skill.description && (
+                    <p className="text-xs mt-2 line-clamp-2 text-muted-foreground">{skill.description}</p>
                   )}
-                </div>
-                {skill.description && (
-                  <p className="text-xs mt-2 line-clamp-2" style={{ color: "var(--text-secondary)" }}>
-                    {skill.description}
-                  </p>
-                )}
-                {missingBins.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-[10px] mb-1" style={{ color: "var(--text-secondary)" }}>
-                      Missing:
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {missingBins.map((bin) => (
-                        <span
-                          key={bin}
-                          className="text-[10px] px-1.5 py-0.5 rounded font-mono bg-red-500/10 text-red-400"
-                        >
-                          {bin}
-                        </span>
-                      ))}
+                  {missingBins.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-[10px] mb-1 text-muted-foreground">Missing:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {missingBins.map((bin) => (
+                          <Badge key={bin} variant="destructive" className="text-[10px] font-mono">
+                            {bin}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-                {skill.install && skill.install.length > 0 && !ready && (
-                  <div className="mt-2 flex gap-1">
-                    {skill.install.slice(0, 2).map((inst) => (
-                      <span
-                        key={inst.id}
-                        className="text-[10px] px-1.5 py-0.5 rounded font-mono"
-                        style={{ background: "var(--background)", color: "var(--text-secondary)" }}
-                      >
-                        {inst.label}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+                  )}
+                </CardContent>
+              </Card>
             );
           })}
         </div>
